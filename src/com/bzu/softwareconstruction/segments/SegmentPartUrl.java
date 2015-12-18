@@ -72,6 +72,7 @@ public class SegmentPartUrl implements FilePartUrl{
 	@Override
 	public boolean isSegment() {
 		insureStreamOpened();
+		
 		if ( this.contentType != null ) {
 			if ( this.contentType.toLowerCase().equals("text/segments-manifest")) {
 				return  true;

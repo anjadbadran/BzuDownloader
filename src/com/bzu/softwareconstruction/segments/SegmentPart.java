@@ -9,7 +9,6 @@ import com.bzu.softwareconstruction.services.multipart.FilePartUrl;
 
 public class SegmentPart implements FilePart{
 	private List<FilePartUrl> itemsUrls = new ArrayList<>();
-
 	public SegmentPart() {
 	}
 	public SegmentPart(File file) {
