@@ -45,6 +45,7 @@ public class SegmentPartUrl implements FilePartUrl{
 
 
 			InputStream is = connection.getInputStream();
+			is.getClass().getName();
 			return is;
 		} catch (IOException e) {
 			throw new InvalidItemURL(e);
@@ -72,14 +73,12 @@ public class SegmentPartUrl implements FilePartUrl{
 	@Override
 	public boolean isSegment() {
 		insureStreamOpened();
-		
 		if ( this.contentType != null ) {
 			if ( this.contentType.toLowerCase().equals("text/segments-manifest")) {
 				return  true;
-			} else if (this.url.toLowerCase().endsWith("segments")) {
-				return true ;
 			}
-			return false;
+		} else if (this.url.toLowerCase().endsWith("segments")) {
+			return true ;
 		}
 		return false;
 				
