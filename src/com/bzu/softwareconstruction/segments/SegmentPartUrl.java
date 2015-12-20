@@ -37,7 +37,7 @@ public class SegmentPartUrl implements FilePartUrl{
 			URLConnection connection = url.openConnection();
 			connection.connect();
 
-			//contentType = connection.getContentType();
+			this.contentType  = connection.getContentType();
 			String contentType = connection.getContentType();
 
 			log.log(Level.INFO, connection.toString());
@@ -61,7 +61,7 @@ public class SegmentPartUrl implements FilePartUrl{
 	
 	private void insureStreamOpened(){
 		if(contentType == null){
-		//	throw new IllegalStateException("You must openStream() before requesting contentType!!");
+			throw new IllegalStateException("You must openStream() before requesting contentType!!");
 		}
 	}
 	@Override
