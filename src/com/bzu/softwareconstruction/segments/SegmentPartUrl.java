@@ -77,7 +77,8 @@ public class SegmentPartUrl implements FilePartUrl{
 			if ( this.contentType.toLowerCase().equals("text/segments-manifest")) {
 				return  true;
 			}
-		} else if (this.url.toLowerCase().endsWith("segments")) {
+		} 
+		if (this.url.toLowerCase().endsWith("segments")) {
 			return true ;
 		}
 		return false;
