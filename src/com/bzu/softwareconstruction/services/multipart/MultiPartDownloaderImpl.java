@@ -24,6 +24,7 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 	@Override
 	public void download(FilePartUrl multipart, File outputFolder) {
 		log.info(String.format(">>Downloading segment:%s", multipart.getItemName()));
+		File finalFile = createResultFile(outputFolder, multipart.getItemName());
 		InputStream inputStream = multipart.openStream();
 		ConcurrentLinkedQueue<FilePart> downloadables = new ConcurrentLinkedQueue<>(DownloadUtils.readSegment(inputStream));
 		
@@ -35,7 +36,7 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 			if(downloadedFile.isSegment()){
 				downloadables.addAll(DownloadUtils.readSegment(downloadedFile.toFileParturl().openStream()));
 			}else{
-				accomulateFiles(downloadedFile,count == 0);
+				accomulateFiles(downloadedFile,count == 0,finalFile);
 			}
 			downloadedFile.delete();
 			log.info(String.format("Downloaded part #%d - still we have %d more parts",count++,downloadables.size()));
@@ -43,21 +44,31 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 		log.info("Finshied downloading file!");
 	}
 	
-	
-	private void accomulateFiles(DownloadedFile downloadedFile, boolean isFirstPart) {
-		String downloadedPartName = downloadedFile.getFile().getName();
-		String[] nameAndSegmentSuffix = downloadedPartName.split("-");
-		String accomulatedFilePath = downloadedFile.getFile().getAbsolutePath().replace("-"+nameAndSegmentSuffix[1], "");
-		File file = new File(accomulatedFilePath);
-		//If this is the first time - create new file
-		//TODO : In this case, we are overriding old downloaded files with same same
-		//Maybe we should add a number ...
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				//Should not happen
-				throw new RuntimeException(e);
-			}
+	/**
+	 * Create new file in the specified directory
+	 * @param outputFolder
+	 * @param itemName
+	 * @return
+	 */
+	private File createResultFile(File outputFolder, String itemName) {
+		int i = itemName.lastIndexOf('.');
+		String resultFileName = itemName.substring(0, i);
+		File resultFile = new File(outputFolder, resultFileName);
+		int count=1;
+		while (resultFile.exists()){
+			resultFile = new File(outputFolder, String.format("%s_%s", count,resultFileName));
+		}
+		try {
+			resultFile.createNewFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return resultFile;
+	}
+
+
+	private void accomulateFiles(DownloadedFile downloadedFile, boolean isFirstPart, File outputFile) {
+		File file = outputFile;
 		OutputStream os;
 		try {
 			os = new FileOutputStream(file,!isFirstPart);
