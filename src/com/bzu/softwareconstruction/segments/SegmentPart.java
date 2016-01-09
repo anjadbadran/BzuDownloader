@@ -15,6 +15,9 @@ public class SegmentPart implements FilePart{
 		addSegmentItem(new SegmentPartUrl(file));
 	}
 
+	public SegmentPart(FilePartUrl multipart) {
+		itemsUrls.add(multipart);
+	}
 	public void addSegmentItem(FilePartUrl segmentItem) {
 		if(segmentItem == null){
 			throw new NullPointerException();
