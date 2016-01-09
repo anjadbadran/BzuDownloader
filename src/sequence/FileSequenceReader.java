@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Static class for reading from a file-sequence stream.
@@ -16,31 +17,35 @@ public class FileSequenceReader {
 	 * If no sub-files remain, returns null. If the stream ends prematurely,
 	 * throws an EOFException.
 	 */
-	public static  byte[]  readOneFile(InputStream sequence)
+	public static byte[] readOneFile(InputStream sequence)
 		throws IOException, EOFException {
-		// animations consist of a (4-byte) int giving the size of the frame,
-		// followed by the frame, followed by another size, followed by the frame,
+		// sequence files consist of a (4-byte) int giving the size of the sub-file,
+		// followed by the sub-file, followed by another size, followed by the sub-file,
 		// and so on until EOF
-		int size;
-		// note that this hides errors involving less than 4 trailing bytes:
-
-		//  String inputStreamString = new Scanner(sequence,"UTF-8").useDelimiter("\\A").next();
-	     //   System.out.println("--"+inputStreamString+"--");
-		try {
-			size = new DataInputStream(sequence).readInt();
-		} catch(EOFException e) { // no more frames
-			return null;
-		}
-		System.out.println("Size=="+size);
-		byte[] data = new byte[size];
-		int read = 0;
-		while(read<size) {
-			int justRead = sequence.read(data, read, size-read);
-			if(justRead==-1)
-				throw new EOFException("stream ended after only "+read+" bytes of "+size+"-byte frame!");
-			read += justRead;
-		}
-		return data;
+		int size = new DataInputStream(sequence).readInt();
+		long unsigned_size = size & 0x00000000ffffffffL;
+		
+		int chunckSize = (int) Math.min(1024 * 1024, unsigned_size);
+		
+		byte[] chunckBytes = new byte[chunckSize];
+		byte[] fileBytes = new byte[0];
+		while(true){
 			
+			int read = sequence.read(chunckBytes, 0, (int) Math.min(chunckSize, unsigned_size));
+			if(read == -1 ){
+				break;
+			}
+			unsigned_size -= read;	
+			//Append bytes
+			byte[] newFileBytes = new byte[fileBytes.length+read];
+			System.arraycopy(fileBytes, 0, newFileBytes, 0, fileBytes.length);
+			System.arraycopy(chunckBytes, 0, newFileBytes, fileBytes.length, read);
+			fileBytes = newFileBytes;
+			
+			if (unsigned_size < 0){
+				break;
+			}
+		}
+		return fileBytes;
 	}
 }
