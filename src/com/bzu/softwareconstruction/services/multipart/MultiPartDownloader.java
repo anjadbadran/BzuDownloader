@@ -1,7 +1,9 @@
 package com.bzu.softwareconstruction.services.multipart;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public interface MultiPartDownloader {
-	public void download(FilePartUrl partUrl,File outputFolder);
+	public InputStream download(FilePartUrl partUrl,File outputFolder) throws FileNotFoundException;
 }
