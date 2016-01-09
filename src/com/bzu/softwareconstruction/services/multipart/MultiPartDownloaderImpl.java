@@ -22,7 +22,7 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 	private static final Logger log = Logger.getLogger(MultiPartDownloaderImpl.class.getName());
 	
 	@Override
-	public void download(FilePartUrl multipart, File outputFolder) {
+	public InputStream download(FilePartUrl multipart, File outputFolder) throws FileNotFoundException {
 		log.info(String.format(">>Downloading segment:%s", multipart.getItemName()));
 		File finalFile = createResultFile(outputFolder, multipart.getItemName());
 		InputStream inputStream = multipart.openStream();
@@ -42,6 +42,7 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 			log.info(String.format("Downloaded part #%d - still we have %d more parts",count++,downloadables.size()));
 		}
 		log.info("Finshied downloading file!");
+		return new FileInputStream(finalFile);
 	}
 	
 	/**
