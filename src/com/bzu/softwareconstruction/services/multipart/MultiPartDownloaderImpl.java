@@ -47,10 +47,28 @@ public class MultiPartDownloaderImpl implements MultiPartDownloader {
 			log.info(String.format("Downloaded part #%d - still we have %d more parts",count++,downloadables.size()));
 		}
 		log.info("Finshied downloading file!");
-		return new MultipartInputStream(filesInputStream);
+		File file = copyInputStreamToFile(new MultipartInputStream(filesInputStream));
+		InputStream in = new FileInputStream(file);
+		return in ;//new MultipartInputStream(filesInputStream);
 	}
 
-
+	private File copyInputStreamToFile( InputStream in ) {
+		File file = new File("./multipartFileDownloaded");
+		try {
+	    	
+	        OutputStream out = new FileOutputStream(file);
+	        byte[] buf = new byte[1024];
+	        int len;
+	        while((len=in.read(buf))>0){
+	            out.write(buf,0,len);
+	        }
+	        out.close();
+	        in.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return file;
+	}
 	private InputstreamAndType download(FilePart alternatives){
 		
 		for(int i=0;i< alternatives.getAlternatives().size();i++){
